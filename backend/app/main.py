@@ -1,0 +1,163 @@
+"""FastAPI application factory and entrypoint."""
+
+import os
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
+from app.core.config import settings, validate_security
+from app.core.limiter import limiter
+from app.core.logging import configure_logging, get_logger
+from app.db.session import run_migrations
+from app.api.routers import (
+    admin,
+    analytics,
+    attendance,
+    auth,
+    face,
+    liveness,
+    users,
+)
+
+configure_logging()
+logger = get_logger("smart_attendance")
+
+
+def seed_admin_user():
+    from app.db.session import SessionLocal
+    from app.models import User
+    from app.core.security import get_password_hash
+    db = SessionLocal()
+    try:
+        admin_email = "admin@gmail.com"
+        admin = db.query(User).filter(User.email == admin_email).first()
+        if not admin:
+            admin = User(
+                email=admin_email,
+                password=get_password_hash("admin@123"),
+                full_name="System Admin",
+                unique_id="ADM0001",
+                phone_number="9999999999",
+                department="Administration",
+                role="admin",
+                is_active=True,
+            )
+            db.add(admin)
+            db.commit()
+            logger.info("Admin user seeded: admin@gmail.com")
+        else:
+            if admin.role != "admin":
+                admin.role = "admin"
+                db.commit()
+    except Exception as e:
+        logger.error(f"Error seeding admin user: {e}")
+    finally:
+        db.close()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Fail fast on insecure production configuration.
+    validate_security(settings)
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    os.makedirs(settings.DATASET_DIR, exist_ok=True)
+    run_migrations()
+    seed_admin_user()
+    logger.info(f"{settings.PROJECT_NAME} v{settings.API_VERSION} started")
+    yield
+
+
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title=settings.PROJECT_NAME,
+        version=settings.API_VERSION,
+        lifespan=lifespan,
+    )
+
+    # Rate limiting
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["X-Total-Count"],
+    )
+
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(self), microphone=(), geolocation=()"
+        if not settings.DEBUG:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
+    # ── Error handling ───────────────────────────────────────────────────
+    # Unhandled exceptions must not echo internal details (exception text, SQL,
+    # file paths) back to the client. The full traceback is logged server-side;
+    # the response carries a generic message.
+
+    @app.exception_handler(IntegrityError)
+    async def integrity_error_handler(request: Request, exc: IntegrityError):
+        logger.warning(f"Integrity error on {request.method} {request.url.path}", exc_info=exc)
+        return JSONResponse(
+            status_code=409,
+            content={"detail": "That change conflicts with an existing record."},
+        )
+
+    @app.exception_handler(SQLAlchemyError)
+    async def database_error_handler(request: Request, exc: SQLAlchemyError):
+        logger.error(f"Database error on {request.method} {request.url.path}", exc_info=exc)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "A database error occurred. Please try again."},
+        )
+
+    @app.exception_handler(Exception)
+    async def unhandled_error_handler(request: Request, exc: Exception):
+        logger.exception(f"Unhandled error on {request.method} {request.url.path}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "An internal error occurred. Please try again."},
+        )
+
+    @app.get("/", tags=["health"])
+    async def root():
+        return {"message": f"{settings.PROJECT_NAME} API", "version": settings.API_VERSION}
+
+    @app.get("/health", tags=["health"])
+    async def health():
+        return {"status": "ok"}
+
+    for router in (
+        auth.router,
+        face.router,
+        liveness.router,
+        attendance.router,
+        users.router,
+        admin.router,
+        analytics.router,
+    ):
+        app.include_router(router)
+
+    return app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=settings.DEBUG)

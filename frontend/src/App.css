@@ -1,0 +1,176 @@
+/* Advanced Face Detection Animations & Cyber HUD Styles */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scanning {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 15px #00E0C6;
+  }
+  100% {
+    transform: translateY(200%);
+    opacity: 0;
+  }
+}
+
+@keyframes detectPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 224, 198, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(0, 224, 198, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 224, 198, 0);
+  }
+}
+
+@keyframes glowBorder {
+  0% {
+    border-color: #FFB000;
+    box-shadow: 0 0 10px rgba(255, 176, 0, 0.5);
+  }
+  50% {
+    border-color: #00E0C6;
+    box-shadow: 0 0 25px rgba(0, 224, 198, 0.8);
+  }
+  100% {
+    border-color: #FFB000;
+    box-shadow: 0 0 10px rgba(255, 176, 0, 0.5);
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardGlow {
+  0% {
+    box-shadow: 0 4px 20px rgba(7, 10, 15, 0.8), 0 0 10px rgba(255, 176, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 8px 40px rgba(7, 10, 15, 0.9), 0 0 30px rgba(0, 224, 198, 0.35);
+  }
+  100% {
+    box-shadow: 0 4px 20px rgba(7, 10, 15, 0.8), 0 0 10px rgba(255, 176, 0, 0.2);
+  }
+}
+
+/* Smart Webcam Styles */
+.smart-webcam-container {
+  position: relative;
+  display: inline-block;
+  border-radius: 16px;
+  border: 2px solid #00E0C6;
+  box-shadow: 0 0 25px rgba(0, 224, 198, 0.25);
+  overflow: hidden;
+}
+
+.smart-webcam-container.detecting {
+  animation: detectPulse 2s infinite;
+  border-color: #FFB000;
+}
+
+.face-preview {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #FFB000;
+  margin: 4px;
+  animation: fadeIn 0.5s ease;
+  transition: all 0.3s ease;
+}
+
+.face-preview:hover {
+  transform: scale(1.08);
+  border-color: #00E0C6;
+  box-shadow: 0 0 15px rgba(0, 224, 198, 0.4);
+}
+
+/* Attendance Terminal */
+.attendance-terminal {
+  background: rgba(13, 19, 31, 0.95);
+  border: 1px solid rgba(0, 224, 198, 0.3);
+  border-radius: 20px;
+  animation: cardGlow 4s infinite;
+}
+
+/* Security HUD */
+.security-hud {
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(7, 10, 15, 0.9);
+  color: #00E0C6;
+  border: 1px solid rgba(0, 224, 198, 0.4);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  box-shadow: 0 0 12px rgba(0, 224, 198, 0.3);
+}
+
+/* Gradient Text */
+.amber-teal-gradient-text {
+  background: linear-gradient(135deg, #FFB000 0%, #00E0C6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
