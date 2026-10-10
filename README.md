@@ -8,140 +8,152 @@
 [![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Cryptography](https://img.shields.io/badge/AES--256--GCM-Encrypted-FFB000?logo=security)](https://en.wikipedia.org/wiki/Galois/Counter_Mode)
 [![SHA-256](https://img.shields.io/badge/SHA--256-Integrity_Verified-00E0C6)](https://en.wikipedia.org/wiki/SHA-2)
-[![InsightFace](https://img.shields.io/badge/InsightFace-ArcFace-orange)](https://github.com/deepinsight/insightface)
-[![MediaPipe](https://img.shields.io/badge/MediaPipe-Liveness-blue)](https://developers.google.com/mediapipe)
+[![InsightFace](https://img.shields.io/badge/InsightFace-ArcFace_512D-orange)](https://github.com/deepinsight/insightface)
+[![MediaPipe](https://img.shields.io/badge/MediaPipe-Liveness_Challenge-blue)](https://developers.google.com/mediapipe)
+[![Tests Passing](https://img.shields.io/badge/Tests-77%2F77_Passed-brightgreen)](https://pytest.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
 
-## 📌 Overview
+## 📌 Executive Summary
 
-**CipherAttend** is an enterprise-grade academic attendance and security platform that replaces error-prone manual roll calls with **authenticated, anti-spoofed facial recognition** and **provable cryptographic security**. 
+**CipherAttend** is an enterprise-grade academic biometric intelligence and security platform engineered to replace error-prone, proxy-vulnerable manual roll calls with **authenticated, anti-spoofed facial recognition** and **provable cryptographic security**.
 
-Unlike conventional facial attendance systems that store vulnerable raw photographs or unencrypted vector arrays, CipherAttend adheres to a **Zero-Raw-Image Security Architecture**:
-1. Camera video streams are analyzed strictly in volatile memory to extract facial landmark geometry.
-2. Embeddings are immediately encrypted using **AES-256-GCM** (Galois/Counter Mode) with 96-bit initialization nonces and 128-bit authentication tags.
-3. Every biometric payload is sealed with a **SHA-256 cryptographic integrity hash** to detect tampering.
-4. Attendance is categorized across a complete **college-level academic hierarchy** with **multi-period subject tracking** (up to 7 periods per day).
+Unlike standard facial attendance tools that store unencrypted biometric vectors or vulnerable raw photos on disk, CipherAttend enforces a strict **Zero-Raw-Image Security Architecture**:
+1. **Volatile In-Memory Processing:** Video frames and uploaded images are processed entirely in RAM. Raw images are instantly wiped immediately after 512-D / 128-D vector extraction.
+2. **AES-256-GCM Authenticated Encryption:** Every biometric embedding is stored at rest as AES-256-GCM ciphertext paired with a unique 96-bit nonce (IV) and a 128-bit authentication tag.
+3. **SHA-256 Cryptographic Tamper Sealing:** Every biometric record is stamped with a cryptographic hash digest to immediately detect and flag any database alteration.
+4. **Dynamic Active Liveness Challenge:** 3D facial yaw sweeps (server-dictated randomized `LEFT`/`RIGHT` challenges with micro-TTL nonces) reject 2D photos, screen replays, and mask attacks.
+5. **Full 4-Year Academic Hierarchy & Multi-Period Scheduling:** Structured tracking across Branches, Years (1st–4th), Semesters (1–8), Sections (A, B, C), USN numbers, and up to 7 subject periods per day.
+6. **Dual Mode Capture & Dual Theme Presentation:** Supports both **Live Web Camera** and **High-Resolution Photo Upload** for registration and attendance, alongside instant **Dark Theme** and **High-Contrast Light Theme** switching.
 
 ---
 
-## 🏗️ Architecture & Security Model
+## 🏗️ System Architecture
 
 ```text
- ┌────────────────────────────────────────────────────────────────────────┐
- │                         CLIENT / BROWSER                               │
- │   • React 18 SPA (Dark Cyberpunk Theme: #070A0F, #00E0C6, #FFB000)      │
- │   • MediaPipe FaceMesh & Blendshapes (Anti-Spoofing & Liveness)        │
- │   • Dual Role Portal: Student Dashboard & Admin Command Center         │
- └───────────────────────────────────┬────────────────────────────────────┘
-                                     │ HTTPS / JWT Bearer
-                                     ▼
- ┌────────────────────────────────────────────────────────────────────────┐
- │                     FASTAPI BACKEND APIS & SERVICES                    │
- │                                                                        │
- │  ┌──────────────────────┐  ┌────────────────────┐  ┌────────────────┐  │
- │  │ Server-Side Liveness │  │ ArcFace / Buffalo  │  │  AES-256-GCM   │  │
- │  │ Randomized Yaw Sweeps│  │ 128-D / 512-D ONNX │  │ Crypto Service │  │
- │  └──────────────────────┘  └────────────────────┘  └────────────────┘  │
- │                                                                        │
- │  ┌──────────────────────────────────────────────────────────────────┐  │
- │  │ Academic Hierarchy Router & Multi-Period Subject Attendance      │  │
- │  │ (Branch ──► Year ──► Semester ──► Section ──► Subjects ──► P1..7)│  │
- │  └──────────────────────────────────────────────────────────────────┘  │
- └───────────────────────────────────┬────────────────────────────────────┘
-                                     │ SQLAlchemy ORM
-                                     ▼
- ┌────────────────────────────────────────────────────────────────────────┐
- │                  ENCRYPTED PERSISTENCE / DATABASE                      │
- │   • users: Authentication, roles, password hashes (bcrypt)             │
- │   • students: Complete academic cohort mapping                         │
- │   • subjects: Course catalog (BCS701 - BCS707)                         │
- │   • face_embeddings: Ciphertext + 96-bit IV + 128-bit Tag (AES-256-GCM)│
- │   • attendance: Period logs (UQ: user_id + date + subject_id + period) │
- └────────────────────────────────────────────────────────────────────────┘
+ ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+ │                                   CLIENT APPLICATION                                    │
+ │  • React 18 SPA (Dual Theme: Dark Cyberpunk & High-Contrast Light Mode)                 │
+ │  • Dual Input: Live Web Camera Stream (Webcam) OR Photo Upload (JPG/PNG/WEBP)           │
+ │  • MediaPipe FaceMesh & Blendshapes (Anti-Spoofing & Active Liveness Challenge)        │
+ │  • Dual Portals: Student Self-Service Dashboard & Admin Security Command Center         │
+ └────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                              │ HTTPS / JWT Bearer Authentication
+                                              ▼
+ ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+ │                           FASTAPI BACKEND APIS & MICRO-SERVICES                         │
+ │                                                                                         │
+ │  ┌────────────────────────┐  ┌────────────────────────┐  ┌───────────────────────────┐  │
+ │  │ Server-Side Liveness   │  │ ArcFace / InsightFace  │  │ AES-256-GCM Cryptographic │  │
+ │  │ Challenge & Yaw Sweeps │  │ 512-D / 128-D Embedder │  │ Engine & SHA-256 Sealer   │  │
+ │  └────────────────────────┘  └────────────────────────┘  └───────────────────────────┘  │
+ │                                                                                         │
+ │  ┌───────────────────────────────────────────────────────────────────────────────────┐  │
+ │  │ 4-Year Academic Hierarchy Router & Multi-Period Subject Attendance Engine         │  │
+ │  │ (Branch ──► Year [1-4] ──► Sem [1-8] ──► Section [A-C] ──► Subjects ──► P1..P7) │  │
+ │  └───────────────────────────────────────────────────────────────────────────────────┘  │
+ └────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                              │ SQLAlchemy 2.0 ORM
+                                              ▼
+ ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+ │                            CRYPTOGRAPHICALLY SECURED DATABASE                           │
+ │   • users: Authentication, roles (admin/student), bcrypt salted passwords ($2b$12)     │
+ │   • students: Cohort mappings (USN, Year 1-4, Sem 1-8, Section A-C, Branch)             │
+ │   • subjects: VTU Course Catalog (BCS701 - BCS707, Cryptography & Network Security)     │
+ │   • face_embeddings: Ciphertext + 96-bit Nonce + 128-bit Tag (AES-256-GCM) + SHA-256    │
+ │   • attendance: Period logs (Unique Constraint: user_id + date + subject_id + period)   │
+ │   • tamper_logs: Audit trail of biometric tampering attempts and spoof flags            │
+ └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## ✨ Key Capabilities
+## ✨ Comprehensive Features
 
 ### 🛡️ 1. Cryptographic Security & Biometric Privacy
-- **AES-256-GCM Authenticated Encryption:** Every biometric vector is encrypted at rest. Decryption requires the verified master key and generates zero ciphertext leakage.
-- **SHA-256 Cryptographic Digest:** Biometric records feature integrity validation digests to flag unauthorized database tampering.
-- **Zero Raw Image Retention:** No photograph is ever committed to disk or database. Raw camera frames are destroyed immediately after mathematical feature extraction.
-- **GDPR & Privacy Compliance (Right to be Forgotten):** Biometric templates can be purged independently without deleting academic identities. Admin deletion cascades and frees student credentials for clean re-registration.
+- **AES-256-GCM Encryption:** Every biometric vector is encrypted at rest using Advanced Encryption Standard in Galois/Counter Mode with a 96-bit initialization vector and 128-bit authentication tag.
+- **SHA-256 Digest Verification:** Biometric payload integrity is verified upon every retrieval. Any manual database tampering or row modification triggers an instant security alert.
+- **Zero Raw Image Retention:** No photograph is ever committed to disk or database. Raw camera frames and uploaded photos are permanently wiped from RAM after vector extraction.
+- **GDPR & VTU Compliance:** Full support for biometric template deletion without destroying academic records. Admin deletion cascades properly and frees credentials for clean re-enrollment.
 
-### 👁️ 2. Anti-Spoofing & Active Liveness Challenge
-- **Server-Issued Dynamic Challenges:** The server dictates a randomized head movement direction (`LEFT` or `RIGHT`) with a tight TTL nonce.
-- **3D Head-Turn Verification:** Real-time angular yaw sweep measurement prevents 2D paper photos, static digital screens, or prerecorded videos from marking attendance.
-- **Multi-Frame Consensus Voting:** Independent frame consensus prevents sporadic recognition errors.
+### 👁️ 2. Dual Capture Modes & Liveness Verification
+- **🎥 Live Webcam Mode:** Real-time facial bounding box tracking, dynamic randomized yaw challenge (`TURN LEFT` / `TURN RIGHT`), and 3D eye-aspect-ratio (EAR) blink verification.
+- **📁 Photo Upload Mode:** Drag-and-drop support for high-resolution single or multi-photo uploads (1–10 images) for both attendance marking and biometric registration.
+- **Multi-Frame Consensus Voting:** Eliminates sporadic lighting errors by evaluating cosine similarity consensus across multiple frames ($Threshold \ge 0.65$).
 
-### 🏫 3. College Academic Hierarchy & Scheduling
-- **Academic Cohort Organization:**
+### 🏫 3. Academic Hierarchy & Multi-Period Attendance
+- **Complete 4-Year Academic Mapping:**
   - **Branches:** `CSE`, `ISE`, `ECE`, `AIML`, `ME`, `CV`
-  - **Years:** `1st`, `2nd`, `3rd`, `4th Year`
+  - **Years:** `1st Year`, `2nd Year`, `3rd Year`, `4th Year`
   - **Semesters:** `1` through `8`
   - **Sections:** `A`, `B`, `C`
-- **Subject-Wise Scheduling:**
-  - Full semester catalog (`BCS701` through `BCS707`, including `BCS703: Cryptography & Network Security`).
-  - **Multi-Period Schedule (Periods 1 to 7):** Students can attend up to 7 distinct subject periods daily.
-- **VTU 75% Attendance Compliance:** Dynamic eligibility tracking with real-time shortage alerts.
+  - **University Seat Number (USN):** e.g., `4SO23CS071`
+- **Multi-Period Timetable Scheduling:**
+  - Full semester course catalog (`BCS701` to `BCS707`, including `BCS703: Cryptography & Network Security`).
+  - Attendance tracked independently across **Periods 1 to 7** per day.
+- **VTU 75% Attendance Compliance Engine:** Real-time percentage calculation with visual alerts for students at risk of shortage.
 
-### 📊 4. Student & Admin Interfaces
-- **Admin Security Command Center:**
-  - 📊 **Main Dashboard:** System metrics, attendance ratios, cryptographic health monitors.
-  - 👥 **Student Directory:** Real-time cohort filters, search, same-email automatic account binding, and student profile inspector.
-  - 🔐 **Cryptography Lab:** Live AES-256-GCM encryption/decryption demonstrator, 128-D vector viewer, SHA-256 verifier.
-  - 🛡️ **Security Center:** Tamper log alarms, spoofing attempt flags.
+### 🎨 4. Dynamic Dual-Theme UI (Presentation-Ready)
+- **🌙 Dark Theme:** Cyberpunk-inspired deep dark interface (`#070A0F`, `#0D131F`) with neon cyan (`#00E0C6`) and amber (`#FFB000`) highlights.
+- **☀️ Light Theme:** Presentation-optimized high-contrast palette with deep obsidian text (`#0F172A`), dark slate subtitles (`#334155`), vivid teal (`#0F766E`), and amber (`#B45309`) with crisp borders for projector displays.
+- **Instant Navbar Switcher:** Persistent toggle stored in `localStorage` and synced dynamically across CSS tokens and MUI components.
+
+### 📊 5. Administrative Command Center & Student Portal
+- **Admin Command Center:**
+  - 📊 **Main Dashboard:** Live statistics, attendance breakdown, and biometric cryptographic health indicators.
+  - 👥 **Student Directory:** Real-time filtering by Branch, Year, Semester, Section, and USN search with inline profile editing.
+  - 🔐 **Cryptography Lab:** Interactive visual demonstrator showing AES-256-GCM encryption, decryption, 128-D vector mapping, and SHA-256 hash validation.
+  - 🛡️ **Face Management:** Inspect enrolled biometric metadata, view sample template thumbnails, or securely purge templates.
 - **Student Dashboard:**
-  - Monthly calendar strictly aligned with weekdays (`Sun` - `Sat`) with visual attendance indicators.
-  - Subject-wise attendance breakdown cards with expandable period-by-period logs.
-  - One-click CSV attendance report export.
+  - Weekday-aligned monthly calendar (`Sun`–`Sat`) with color-coded daily status badges.
+  - Subject-by-subject attendance progress bars with expandable period-by-period audit logs.
+  - One-click CSV attendance report generator.
 
 ---
 
 ## 🚀 Quick Start Guide
 
 ### Prerequisites
-- Python 3.10+ (Recommended: Python 3.11)
-- Node.js 18+ & npm
-- Webcam for biometric capture
+- **Python:** 3.10 or 3.11 (Recommended: Python 3.11)
+- **Node.js:** 18+ and npm
+- **Webcam:** Optional for live scan (or use the Image Upload feature)
 
 ---
 
-### 1. Backend Setup
+### Step 1: Backend Setup & Launch
 
 ```bash
 # Navigate to backend directory
-cd backend
+cd CipherAttend/backend
 
 # Create and activate virtual environment
 python -m venv .venv
 
-# On Windows:
+# On Windows (PowerShell / CMD):
 .venv\Scripts\activate
-# On Linux/macOS:
+
+# On Linux / macOS:
 # source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Start backend server (auto-seeds database & default admin)
-uvicorn app.main:app --reload --port 8000
+# Start FastAPI backend server (auto-initializes database & seed data)
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-> **API Documentation (Swagger UI):** Open [http://localhost:8000/docs](http://localhost:8000/docs)
+> **Interactive API Docs (Swagger UI):** Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
-### 2. Frontend Setup
+### Step 2: Frontend Setup & Launch
 
 ```bash
-# Navigate to frontend directory
-cd frontend
+# Open a new terminal and navigate to frontend directory
+cd CipherAttend/frontend
 
-# Install npm packages
+# Install frontend packages
 npm install
 
 # Start React development server
@@ -152,73 +164,104 @@ npm start
 
 ---
 
-### 3. One-Click Windows Launchers
+## 🔑 Default Login Credentials
 
-The project includes batch scripts for quick startup:
-- Double-click `run_backend.bat` to launch the FastAPI server.
-- Double-click `run_frontend.bat` to start the React interface.
-
----
-
-## 🔑 Default Credentials
-
-| Portal | Role | Email | Password |
-|---|---|---|---|
-| Admin Command Center | Administrator | `admin@gmail.com` | `admin@123` |
-| Student Dashboard | Student Demo | `milanraj.23cs071@sode-edu.in` | `milan@123` |
-
-*(Note: Pre-seeded demo student USN: `4SO23CS071`, Branch: `CSE`, Semester: `6`, Section: `A`)*
+| Role | Portal | Email | Password | Details |
+|---|---|---|---|---|
+| **Administrator** | Admin Command Center | `admin@gmail.com` | `admin@123` | Full administrative control & crypto lab |
+| **Student** | Student Portal | `milanraj.23cs071@sode-edu.in` | `milan@123` | USN: `4SO23CS071`, 4th Year, Sem 6, Sec A |
 
 ---
 
-## ⚙️ Environment Variables
+## 🧪 Testing & Verification
 
-Configure backend settings via `backend/.env`:
+The system includes a test suite covering authentication, cryptographic integrity, AES-256-GCM encryption/decryption, liveness challenges, and academic hierarchy rules.
 
-| Key | Default | Description |
-|---|---|---|
-| `DATABASE_URL` | `sqlite:///attendance_system.db` | Database connection string (SQLite / PostgreSQL) |
-| `SECRET_KEY` | `change-me-in-production` | Secret key for JWT signature and session validation |
-| `ALGORITHM` | `HS256` | JWT signing algorithm |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `60` | Token validity duration |
-| `APP_TIMEZONE` | `Asia/Kolkata` | Organization timezone |
-| `BACKEND_CORS_ORIGINS` | `http://localhost:3000` | Permitted CORS frontend origins |
-| `FACE_MODEL_PACK` | `buffalo_l` | InsightFace recognition model weights |
-| `LIVENESS_CHALLENGE_ENABLED` | `True` | Enforce server-side 3D head sweep verification |
+### Running Backend Tests (77/77 Passing)
+```bash
+cd CipherAttend/backend
+.venv\Scripts\pytest -v
+```
+
+### Running Frontend Tests (3/3 Passing)
+```bash
+cd CipherAttend/frontend
+npm test -- --watchAll=false
+```
 
 ---
 
-## 📡 Key API Endpoints
+## 📡 Key REST API Endpoints
 
 ### 🔐 Authentication & Accounts
 - `POST /auth/login` — User & Admin JWT authentication
-- `POST /auth/register` — Student self-service registration (auto-binds to academic profile)
+- `POST /auth/register` — Student self-registration (auto-binds to academic cohort)
+- `GET /user/profile` — Get current user academic & biometric profile
+- `PUT /user/profile` — Update personal contact details
+- `POST /user/change-password` — Secure password update with bcrypt hashing
 
-### 📸 Biometrics & Liveness
-- `POST /liveness/challenge` — Generates dynamic head-turn nonce
-- `POST /face/register` — Registers biometric template (AES-256-GCM encrypted)
-- `POST /attendance/mark` — Multi-frame liveness verification & subject attendance marking
+### 📸 Biometrics & Attendance
+- `POST /liveness/challenge` — Generates dynamic yaw challenge nonce
+- `POST /face/register` — Registers biometric template via live camera frames (AES-256-GCM)
+- `POST /face/register-upload` — Registers biometric template via uploaded images
+- `POST /attendance/mark` — Marks subject attendance via live webcam
+- `POST /attendance/mark-upload` — Marks subject attendance via photo upload
+- `GET /user/attendance` — Student subject-wise attendance history & calendar
 
-### 🏫 Academic & Cohort Management (Admin)
-- `GET /admin/students` — Filter students by branch, year, semester, section, or subject
-- `POST /admin/students` — Pre-register student academic identity
-- `DELETE /admin/students/{id}` — Full purge of student profile, login account, and biometrics
-- `GET /admin/students/{id}/details` — 4-tab biometric, cryptographic, and subject breakdown
-- `POST /admin/students/{id}/attendance/seed-multi-period` — One-click multi-period demo seeder
-
-### 📚 Subject & Attendance Stats
-- `GET /admin/subjects` / `POST /admin/subjects` — Course catalog management
-- `GET /user/attendance` — Student dashboard attendance & subject-wise performance breakdown
+### 🏫 Academic & Administrative Management
+- `GET /admin/students` — Cohort directory with Branch, Year, Sem, Section, USN filters
+- `POST /admin/students` — Register new student profile
+- `PUT /admin/students/{id}` — Edit student academic data (USN, Year 1-4, Sem 1-8, Section)
+- `DELETE /admin/students/{id}` — Cascade purge of student account & biometrics
+- `GET /admin/students/{id}/details` — Complete 4-tab biometric & cryptographic inspection
+- `POST /admin/students/{id}/attendance/seed-multi-period` — Demo data seeder for period logs
+- `GET /admin/subjects` — Course catalog listing
+- `GET /admin/stats` — System-wide attendance, enrollment, and security metrics
 
 ---
 
-## 🔬 VTU BCS703 Academic Mapping
+## 🔬 VTU BCS703 Cryptography & Network Security Mapping
 
-This project directly fulfills and demonstrates the practical requirements of **VTU BCS703 Cryptography & Network Security**:
-- **Symmetric Block Ciphers:** AES-256 operating in Galois/Counter Mode (GCM).
-- **Cryptographic Hash Functions:** SHA-256 for biometric payload integrity verification.
-- **Non-Repudiation & Authentication:** Dynamic challenges + authenticated encryption tags.
-- **Secure Key Management:** Zero exposure of master cryptographic keys to the client tier.
+This project serves as a real-world implementation of the **VTU BCS703** curriculum:
+
+| Cryptographic Principle | Implementation in CipherAttend |
+|---|---|
+| **Symmetric Encryption** | AES-256 in Galois/Counter Mode (GCM) for biometric vectors |
+| **Cryptographic Hash Functions** | SHA-256 message digests for database integrity validation |
+| **Password Hashing** | Bcrypt with work factor 12 and unique salt per user |
+| **Challenge-Response Protocol** | Dynamic server-issued yaw challenge with micro-TTL nonce |
+| **Authenticated Encryption** | 128-bit MAC tag verification preventing ciphertext tampering |
+| **Key Management** | Master key separation; zero client-side crypto key exposure |
+
+---
+
+## 📁 Repository Directory Structure
+
+```text
+cryptooooo/
+├── CipherAttend/
+│   ├── backend/
+│   │   ├── app/
+│   │   │   ├── api/routers/      # auth, admin, attendance, face, liveness, user
+│   │   │   ├── core/             # config, security (AES-256-GCM, SHA-256, JWT)
+│   │   │   ├── db/               # database engine & seeders
+│   │   │   ├── models/           # SQLAlchemy database schemas
+│   │   │   ├── schemas/          # Pydantic request/response schemas
+│   │   │   └── services/         # ArcFace recognition & crypto services
+│   │   ├── tests/                # 77 automated test suites
+│   │   └── requirements.txt      # Python dependencies
+│   ├── frontend/
+│   │   ├── src/
+│   │   │   ├── components/       # Admin, Student, FaceCapture, Attendance, Theme
+│   │   │   ├── context/          # ThemeContext (Dark / Light switcher)
+│   │   │   ├── services/         # Axios API service bindings
+│   │   │   └── index.css         # High-contrast CSS design tokens
+│   │   └── package.json          # React dependencies
+│   ├── run_backend.bat           # Windows 1-click backend launcher
+│   ├── run_frontend.bat          # Windows 1-click frontend launcher
+│   └── README.md                 # Project documentation
+└── README.md                     # Root documentation
+```
 
 ---
 
@@ -226,8 +269,6 @@ This project directly fulfills and demonstrates the practical requirements of **
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
----
-
 <p align="center">
-  Crafted with precision for <strong>Secure Biometric Intelligence</strong>
+  Crafted with precision for <strong>Secure Biometric Intelligence & Academic Excellence</strong>
 </p>

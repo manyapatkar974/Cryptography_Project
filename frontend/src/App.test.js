@@ -27,7 +27,7 @@ describe('App', () => {
       </MemoryRouter>
     );
     // The Navbar brand link is always visible
-    expect(screen.getAllByText('SAS').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/CRYPTOLAB/i).length).toBeGreaterThan(0);
   });
 
   it('redirects unauthenticated users from /dashboard to /login', () => {
